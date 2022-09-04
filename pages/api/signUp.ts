@@ -7,13 +7,14 @@ import jwt from 'jsonwebtoken'
 import { randomUUID } from 'crypto'
 
 type Data = {
-  name: string
+  message: string,
+  authToken?: string,
 }
 
 const jwtSecret = process.env.JWT_SECRET
 
 const handler = async (req: NextApiRequest,
-    res: NextApiResponse)=>{
+    res: NextApiResponse<Data>)=>{
         if(req.method==='POST'){
             let salt = await bcrypt.genSalt(10)
             let storePass = await bcrypt.hash(req.body.passWord,salt)
