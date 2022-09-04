@@ -19,7 +19,7 @@ const handler = async (req: NextApiRequest,
             let storePass = await bcrypt.hash(req.body.passWord,salt)
             let uid = randomUUID()
 
-            let users = await UserLogin.create({
+            let users = new UserLogin({
                 userId: uid,
                 userEmail: req.body.userEmail,
                 passWord: storePass,
