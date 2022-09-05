@@ -33,7 +33,7 @@ const handler = async (req: NextApiRequest,
                 }
             }
 
-            let authToken = jwt.sign(data,jwtSecret,{expiresIn: "2d"})
+            let authToken = jwt.sign(data,jwtSecret)
 
             return res.status(201).json({ message: "Success",authToken })
         }else{

@@ -4,10 +4,11 @@ import UserLogin from './schemas/userLogin'
 import connectDb from '../../middleware/mongoose'
 import bcrypt from 'bcrypt'
 import jwt from 'jsonwebtoken'
+import authenticate from '../../middleware/authenticateToken'
 
 type Data = {
   message?: string,
-  authToken?: string
+  users?: string
 }
 const jwtSecret = process.env.JWT_SECRET
 
@@ -15,13 +16,11 @@ const handler = async (req: NextApiRequest,
     res: NextApiResponse<Data>)=>{
         if(req.method==="POST"){
             try {
-                const {userEmail} = req.body
-                let users = await UserLogin.findOne({userEmail})
+                authenticate(req,res)
+                console.log(req.user["user"]['id'])
+                let userId = req.user["user"]['id']
+                let users = await UserLogin.findOne({userId}).select("-passWord")
                 if(!users){
-                    return res.status(400).json({ message: "Please enter Correct Credentials" })
-                }
-                let passCompare = await bcrypt.compare(req.body.passWord,users.passWord)
-                if(!passCompare){
                     return res.status(400).json({ message: "Please enter Correct Credentials" })
                 }
                 const data = {
@@ -31,7 +30,7 @@ const handler = async (req: NextApiRequest,
                 }
                 let authToken = jwt.sign(data,jwtSecret)
                 
-                return res.status(200).json({ authToken })
+                return res.status(200).json({ users })
                 
             } catch (error) {
                 return res.status(400).json({ message: "Please enter Correct Credentials" })
