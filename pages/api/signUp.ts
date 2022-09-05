@@ -3,7 +3,7 @@ import type { NextApiRequest, NextApiResponse } from 'next'
 import UserLogin from './schemas/userLogin'
 import connectDb from '../../middleware/mongoose'
 import bcrypt from 'bcrypt'
-import jwt from 'jsonwebtoken'
+import jwt, { Secret } from 'jsonwebtoken'
 import { randomUUID } from 'crypto'
 
 type Data = {
@@ -11,7 +11,7 @@ type Data = {
   authToken?: string,
 }
 
-const jwtSecret = process.env.JWT_SECRET
+const jwtSecret:String|undefined = process.env.JWT_SECRET
 
 const handler = async (req: NextApiRequest,
     res: NextApiResponse<Data>)=>{

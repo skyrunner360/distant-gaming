@@ -10,7 +10,7 @@ type Data = {
   authToken?: string,
   refreshToken?: string
 }
-const jwtSecret = process.env.JWT_SECRET
+const jwtSecret:String|undefined = process.env.JWT_SECRET
 
 const handler = async (req: NextApiRequest,
     res: NextApiResponse<Data>)=>{
@@ -45,7 +45,7 @@ const handler = async (req: NextApiRequest,
             return res.status(500).json({ message: "Internal Server Error!" })
         }
 }
-const genAccessToken = (data)=>{
+const genAccessToken = (data:{user:{id: String}})=>{
     return jwt.sign(data,jwtSecret,{expiresIn: "2d"})
 }
 export default connectDb(handler)

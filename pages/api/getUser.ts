@@ -8,7 +8,7 @@ import authenticate from '../../middleware/authenticateToken'
 
 type Data = {
   message?: string,
-  users?: string
+  users?: { userId: string; userEmail: string; passWord: string; refreshToken?: string | undefined; isAdmin?: boolean | undefined; }
 }
 const jwtSecret = process.env.JWT_SECRET
 

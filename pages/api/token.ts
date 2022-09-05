@@ -8,16 +8,24 @@ import authenticate from '../../middleware/authenticateToken'
 
 type Data = {
   message?: string,
-  users?: string
+  users?: string,
+  accessToken?:string
 }
-const jwtSecret = process.env.JWT_REFRESH_SECRET
+interface users {
+    userId: string,
+    userEmail: string,
+    passWord: string,
+    refreshToken?: string | undefined,
+    isAdmin?: boolean | undefined,
+}
+const jwtSecret:string|undefined = process.env.JWT_REFRESH_SECRET
 
 const handler = async (req: NextApiRequest,
     res: NextApiResponse<Data>)=>{
         if(req.method==="POST"){
             try {
                 let refreshToken = req.body.token
-                let users = await UserLogin.findOne({refreshToken}).select("-passWord")
+                let users:users|null = await UserLogin.findOne({refreshToken}).select("-passWord")
                 if(refreshToken===null) return res.status(401)
                 if(!users?.refreshToken) return res.status(403)
                 jwt.verify(users.refreshToken,jwtSecret,(err,user)=>{

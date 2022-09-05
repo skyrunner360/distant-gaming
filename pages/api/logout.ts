@@ -7,8 +7,6 @@ import jwt from 'jsonwebtoken'
 
 type Data = {
   message?: string,
-  authToken?: string,
-  refreshToken?: string
 }
 
 const handler = async (req: NextApiRequest,
