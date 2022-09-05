@@ -7,7 +7,8 @@ import jwt from 'jsonwebtoken'
 
 type Data = {
   message?: string,
-  authToken?: string
+  authToken?: string,
+  refreshToken?: string
 }
 const jwtSecret = process.env.JWT_SECRET
 
@@ -16,7 +17,7 @@ const handler = async (req: NextApiRequest,
         if(req.method==="POST"){
             try {
                 const {userEmail} = req.body
-                let users = await UserLogin.findOne({userEmail})
+                let users = await UserLogin.findOne({userEmail}).clone()
                 if(!users){
                     return res.status(400).json({ message: "Please enter Correct Credentials" })
                 }
@@ -29,15 +30,22 @@ const handler = async (req: NextApiRequest,
                         id: users.userId
                     }
                 }
-                let authToken = jwt.sign(data,jwtSecret)
+                // Generate Token on Login
+                let authToken = genAccessToken(data)
+                let refreshToken = jwt.sign(data,process.env.JWT_REFRESH_SECRET)
+                await UserLogin.findOneAndUpdate({userId: users.userId},{refreshToken}).clone()
                 
-                return res.status(200).json({ authToken })
+                return res.status(200).json({ authToken,refreshToken })
                 
             } catch (error) {
+                console.log(error)
                 return res.status(400).json({ message: "Please enter Correct Credentials" })
             }
         }else{
             return res.status(500).json({ message: "Internal Server Error!" })
         }
+}
+const genAccessToken = (data)=>{
+    return jwt.sign(data,jwtSecret,{expiresIn: "2d"})
 }
 export default connectDb(handler)

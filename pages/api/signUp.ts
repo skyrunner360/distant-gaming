@@ -19,20 +19,20 @@ const handler = async (req: NextApiRequest,
             let salt = await bcrypt.genSalt(10)
             let storePass = await bcrypt.hash(req.body.passWord,salt)
             let uid = randomUUID()
-
-            let users = new UserLogin({
+            
+            var users = new UserLogin({
                 userId: uid,
                 userEmail: req.body.userEmail,
                 passWord: storePass,
-                isAdmin: req.body.isAdmin
+                isAdmin: req.body.isAdmin,
             })
-            await users.save()
             const data = {
                 user: {
                     id: users.userId
                 }
             }
-
+            await users.save()
+            // Generate Token on Sign Up
             let authToken = jwt.sign(data,jwtSecret)
 
             return res.status(201).json({ message: "Success",authToken })

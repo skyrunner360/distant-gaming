@@ -10,25 +10,26 @@ type Data = {
   message?: string,
   users?: string
 }
-const jwtSecret = process.env.JWT_SECRET
+const jwtSecret = process.env.JWT_REFRESH_SECRET
 
 const handler = async (req: NextApiRequest,
     res: NextApiResponse<Data>)=>{
         if(req.method==="POST"){
             try {
-                authenticate(req,res)
-                let userId = req.user["user"]['id']
-                // Get user by userID but Exclude Password field
-                let users = await UserLogin.findOne({userId}).select("-passWord")
-                if(!users){
-                    return res.status(400).json({ message: "Please enter Correct Credentials" })
-                }
-                const data = {
-                    user: {
-                        id: users.userId
+                let refreshToken = req.body.token
+                let users = await UserLogin.findOne({refreshToken}).select("-passWord")
+                if(refreshToken===null) return res.status(401)
+                if(!users?.refreshToken) return res.status(403)
+                jwt.verify(users.refreshToken,jwtSecret,(err,user)=>{
+                    if (err) return res.status(403)
+                    const data = {
+                        user: {
+                            id: user["user"].id
+                        }
                     }
-                }
-                return res.status(200).json({ users })
+                    const accessToken = genAccessToken(data)
+                    return res.status(200).json({ accessToken })
+                })
                 
             } catch (error) {
                 return res.status(400).json({ message: "Please enter Correct Credentials" })
@@ -36,5 +37,8 @@ const handler = async (req: NextApiRequest,
         }else{
             return res.status(500).json({ message: "Internal Server Error!" })
         }
+}
+const genAccessToken = (data)=>{
+    return jwt.sign(data,jwtSecret,{expiresIn: "2d"})
 }
 export default connectDb(handler)
